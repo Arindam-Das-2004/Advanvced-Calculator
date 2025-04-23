@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes buttonPress {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        .calculator {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .btn:active {
+            animation: buttonPress 0.1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-900 text-white" id="theme">
+    <div class="absolute top-4 right-4">
+        <button onclick="toggleTheme()" class="bg-gray-600 text-white px-4 py-2 rounded">Toggle Theme</button>
+    </div>
+    <div class="calculator bg-gray-800 p-6 rounded-lg shadow-lg w-80 transition-all duration-500">
+        <input type="text" id="display" readonly class="w-full text-right text-2xl p-3 bg-gray-700 rounded mb-4 transition-all duration-500">
+        <div class="grid grid-cols-4 gap-2">
+            <button onclick="clearDisplay()" class="btn bg-red-500 p-4 rounded shadow-md">C</button>
+            <button onclick="appendToDisplay('(')" class="btn bg-gray-600 p-4 rounded shadow-md">(</button>
+            <button onclick="appendToDisplay(')')" class="btn bg-gray-600 p-4 rounded shadow-md">)</button>
+            <button onclick="appendToDisplay('/')" class="btn bg-yellow-500 p-4 rounded shadow-md">/</button>
+            <button onclick="appendToDisplay('7')" class="btn bg-gray-700 p-4 rounded shadow-md">7</button>
+            <button onclick="appendToDisplay('8')" class="btn bg-gray-700 p-4 rounded shadow-md">8</button>
+            <button onclick="appendToDisplay('9')" class="btn bg-gray-700 p-4 rounded shadow-md">9</button>
+            <button onclick="appendToDisplay('*')" class="btn bg-yellow-500 p-4 rounded shadow-md">*</button>
+            <button onclick="appendToDisplay('4')" class="btn bg-gray-700 p-4 rounded shadow-md">4</button>
+            <button onclick="appendToDisplay('5')" class="btn bg-gray-700 p-4 rounded shadow-md">5</button>
+            <button onclick="appendToDisplay('6')" class="btn bg-gray-700 p-4 rounded shadow-md">6</button>
+            <button onclick="appendToDisplay('-')" class="btn bg-yellow-500 p-4 rounded shadow-md">-</button>
+            <button onclick="appendToDisplay('1')" class="btn bg-gray-700 p-4 rounded shadow-md">1</button>
+            <button onclick="appendToDisplay('2')" class="btn bg-gray-700 p-4 rounded shadow-md">2</button>
+            <button onclick="appendToDisplay('3')" class="btn bg-gray-700 p-4 rounded shadow-md">3</button>
+            <button onclick="appendToDisplay('+')" class="btn bg-yellow-500 p-4 rounded shadow-md">+</button>
+            <button onclick="appendToDisplay('0')" class="btn bg-gray-700 p-4 rounded shadow-md">0</button>
+            <button onclick="appendToDisplay('.')" class="btn bg-gray-700 p-4 rounded shadow-md">.</button>
+            <button onclick="calculateResult()" class="btn bg-green-500 p-4 rounded shadow-md">=</button>
+            <button onclick="appendToDisplay('Math.sqrt(')" class="btn bg-blue-500 p-4 rounded shadow-md">√</button>
+            <button onclick="appendToDisplay('Math.sin(Math.PI/180*')" class="btn bg-blue-500 p-4 rounded shadow-md">sin</button>
+            <button onclick="appendToDisplay('Math.cos(Math.PI/180*')" class="btn bg-blue-500 p-4 rounded shadow-md">cos</button>
+            <button onclick="appendToDisplay('Math.tan(Math.PI/180*')" class="btn bg-blue-500 p-4 rounded shadow-md">tan</button>
+            <button onclick="appendToDisplay('Math.log10(')" class="btn bg-blue-500 p-4 rounded shadow-md">log</button>
+        </div>
+    </div>
+    <script>
+        function appendToDisplay(value) {
+            document.getElementById('display').value += value;
+        }
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+        function calculateResult() {
+            try {
+                let expression = document.getElementById('display').value;
+                if (expression.includes('Math.sin') || expression.includes('Math.cos') || expression.includes('Math.tan')) {
+                    expression += ')';
+                }
+                fetch('http://localhost:3000/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ expression })
+                })
+                .then(response => response.json())
+                .then(data => document.getElementById('display').value = data.result)
+                .catch(error => console.error('Error:', error));
+            } catch (error) {
+                document.getElementById('display').value = 'Error';
+            }
+        }
+        function toggleTheme() {
+            const theme = document.getElementById('theme');
+            if (theme.classList.contains('bg-gray-900')) {
+                theme.classList.replace('bg-gray-900', 'bg-white');
+                theme.classList.replace('text-white', 'text-black');
+                document.querySelector('.calculator').classList.replace('bg-gray-800', 'bg-gray-200');
+                document.querySelector('#display').classList.replace('bg-gray-700', 'bg-gray-100');
+            } else {
+                theme.classList.replace('bg-white', 'bg-gray-900');
+                theme.classList.replace('text-black', 'text-white');
+                document.querySelector('.calculator').classList.replace('bg-gray-200', 'bg-gray-800');
+                document.querySelector('#display').classList.replace('bg-gray-100', 'bg-gray-700');
+            }
+        }
+    </script>
+</body>
+</html>
